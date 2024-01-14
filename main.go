@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"math"
 	"unicode"
-
-	"github.com/mattn/go-runewidth"
 )
 
 func main() {
@@ -51,7 +49,7 @@ func main() {
 	}
 
 	formattedStrings := []string{
-		fmt.Sprintf("OS: %v", capitalize(SystemInfo.OS)),
+    fmt.Sprintf("OS: %v", capitalize(SystemInfo.OS)),
 		fmt.Sprintf("Distro: %v %v", capitalize(SystemInfo.Distro), SystemInfo.PlatformVersion),
 		fmt.Sprintf("CPU: %v", CpuInfo),
 		fmt.Sprintf("Terminal: %v", Terminal),
@@ -64,22 +62,22 @@ func main() {
 	maxWidth := 0
 
 	for _, s := range formattedStrings {
-		if maxWidth < runewidth.StringWidth(s) {
-			maxWidth = runewidth.StringWidth(s)
+		if maxWidth < len(s) {
+			maxWidth = len(s)
 		}
 	}
 
 	maxWidth += len(asciiLinux[0])
 
 	fmt.Printf("╭───%v", title)
-	printChar('─', maxWidth - runewidth.StringWidth(prompt) - runewidth.StringWidth(title) - 3)
+	printChar('─', maxWidth - len(prompt) - len(title) - 3)
 	fmt.Printf("%v───╮\n", prompt)
 
 	for i, s := range formattedStrings {
 		fmt.Printf("│ ")
 		fmt.Printf("%v ", asciiLinux[i])
 		fmt.Printf("%v", s)
-		printChar(' ', maxWidth-runewidth.StringWidth(s) - len(asciiLinux[0]) + 1)
+		printChar(' ', maxWidth-len(s) - len(asciiLinux[0]) + 1)
 		fmt.Printf("│\n")
 	}
 
