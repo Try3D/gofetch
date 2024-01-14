@@ -7,6 +7,10 @@ import (
 )
 
 func main() {
+  blue := "\x1b[1;34m";
+  bold := "\x1b[1m"
+  reset := "\x1b[0m";
+
 	BatteryInfo, err := get_battery()
 	if err != nil {
 		fmt.Println(err)
@@ -34,8 +38,8 @@ func main() {
 		return
 	}
 
-	title := "gofetch"
-	prompt := fmt.Sprintf("%v@%v", SystemInfo.CurrentUser, SystemInfo.HostName)
+	title := bold + blue + "gofetch" + reset
+	prompt := fmt.Sprintf("%v%v%v%v@%v%v%v%v", bold, blue, SystemInfo.CurrentUser, reset, bold, blue, SystemInfo.HostName, reset)
 
 	asciiLinux := []string{
 		"    .---.    ",
@@ -49,14 +53,14 @@ func main() {
 	}
 
 	formattedStrings := []string{
-    fmt.Sprintf("OS: %v", capitalize(SystemInfo.OS)),
-		fmt.Sprintf("Distro: %v %v", capitalize(SystemInfo.Distro), SystemInfo.PlatformVersion),
-		fmt.Sprintf("CPU: %v", CpuInfo),
-		fmt.Sprintf("Terminal: %v", Terminal),
-		fmt.Sprintf("Shell: %v", Shell),
-		fmt.Sprintf("Disk (/): %vG / %vG (%v%%)", DiskInfo.Used, DiskInfo.Total, DiskInfo.Percent),
-		fmt.Sprintf("Battery: %.f%% %v", BatteryInfo.Charge, BatteryInfo.State),
-		fmt.Sprintf("Time to full: %.f h %.f min", math.Floor(BatteryInfo.TimeToFull), 60*(BatteryInfo.TimeToFull-math.Floor(BatteryInfo.TimeToFull))),
+    fmt.Sprintf("%v%vOS:%v %v", bold, blue, reset, capitalize(SystemInfo.OS)),
+		fmt.Sprintf("%v%vDistro:%v %v %v", bold, blue, reset, capitalize(SystemInfo.Distro), SystemInfo.PlatformVersion),
+		fmt.Sprintf("%v%vCPU:%v %v", bold, blue, reset, CpuInfo),
+		fmt.Sprintf("%v%vTerminal:%v %v", bold, blue, reset, Terminal),
+		fmt.Sprintf("%v%vShell:%v %v", bold, blue, reset, Shell),
+		fmt.Sprintf("%v%vDisk (/):%v %vG / %vG (%v%%)", bold, blue, reset, DiskInfo.Used, DiskInfo.Total, DiskInfo.Percent),
+		fmt.Sprintf("%v%vBattery:%v %.f%% %v", bold, blue, reset, BatteryInfo.Charge, BatteryInfo.State),
+		fmt.Sprintf("%v%vTime to full:%v %.f h %.f min", bold, blue, reset, math.Floor(BatteryInfo.TimeToFull), 60*(BatteryInfo.TimeToFull-math.Floor(BatteryInfo.TimeToFull))),
 	}
 
 	maxWidth := 0
@@ -70,7 +74,7 @@ func main() {
 	maxWidth += len(asciiLinux[0])
 
 	fmt.Printf("╭───%v", title)
-	printChar('─', maxWidth - len(prompt) - len(title) - 3)
+	printChar('─', maxWidth - len(prompt) - len(title) + 27)
 	fmt.Printf("%v───╮\n", prompt)
 
 	for i, s := range formattedStrings {
@@ -82,7 +86,7 @@ func main() {
 	}
 
 	fmt.Printf("╰")
-	printChar('─', maxWidth + 3)
+	printChar('─', maxWidth - 12)
 	fmt.Printf("╯\n")
 }
 
