@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-  blue := "\x1b[1;34m";
-  bold := "\x1b[1m"
-  reset := "\x1b[0m";
+	blue := "\x1b[1;34m"
+	bold := "\x1b[1m"
+	reset := "\x1b[0m"
 
 	BatteryInfo, err := get_battery()
 	if err != nil {
@@ -53,7 +53,7 @@ func main() {
 	}
 
 	formattedStrings := []string{
-    fmt.Sprintf("%v%vOS:%v %v", bold, blue, reset, capitalize(SystemInfo.OS)),
+		fmt.Sprintf("%v%vOS:%v %v", bold, blue, reset, capitalize(SystemInfo.OS)),
 		fmt.Sprintf("%v%vDistro:%v %v %v", bold, blue, reset, capitalize(SystemInfo.Distro), SystemInfo.PlatformVersion),
 		fmt.Sprintf("%v%vCPU:%v %v", bold, blue, reset, CpuInfo),
 		fmt.Sprintf("%v%vTerminal:%v %v", bold, blue, reset, Terminal),
@@ -74,19 +74,19 @@ func main() {
 	maxWidth += len(asciiLinux[0])
 
 	fmt.Printf("╭───%v", title)
-	printChar('─', maxWidth - len(prompt) - len(title) + 27)
+	printChar('─', maxWidth-len(prompt)-len(title)+27)
 	fmt.Printf("%v───╮\n", prompt)
 
 	for i, s := range formattedStrings {
 		fmt.Printf("│ ")
 		fmt.Printf("%v ", asciiLinux[i])
 		fmt.Printf("%v", s)
-		printChar(' ', maxWidth-len(s) - len(asciiLinux[0]) + 1)
+		printChar(' ', maxWidth-len(s)-len(asciiLinux[0])+1)
 		fmt.Printf("│\n")
 	}
 
 	fmt.Printf("╰")
-	printChar('─', maxWidth - 12)
+	printChar('─', maxWidth-12)
 	fmt.Printf("╯\n")
 }
 
