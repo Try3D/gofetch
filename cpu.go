@@ -1,27 +1,18 @@
 package main
 
 import (
-	"os/exec"
-	"runtime"
-	"strings"
+	"github.com/jaypipes/ghw"
 )
 
 func get_cpu_model() (string, error) {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "darwin":
-		cmd = exec.Command("sysctl", "-n", "machdep.cpu.brand_string")
-	case "linux":
-		cmd = exec.Command("sh", "-c", "grep -m1 'model name' /proc/cpuinfo | cut -d: -f2")
-	default:
-		cmd = exec.Command("sh", "-c", "echo 'Unknown CPU'")
-	}
-
-	output, err := cmd.Output()
+	cpu, err := ghw.CPU()
 	if err != nil {
-		return "", err
+		return "Unknown", nil
 	}
 
-	return strings.TrimSpace(string(output)), nil
+	if len(cpu.Processors) > 0 {
+		return cpu.Processors[0].Model, nil
+	}
+
+	return "Unknown", nil
 }

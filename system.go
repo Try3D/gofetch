@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/v3/host"
 	"os/user"
 )
 
