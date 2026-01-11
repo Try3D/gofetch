@@ -1,19 +1,27 @@
 package main
 
 import (
-	"fmt"
-	"github.com/shirou/gopsutil/cpu"
+	"os/exec"
+	"runtime"
+	"strings"
 )
 
 func get_cpu_model() (string, error) {
-	cpuInfo, err := cpu.Info()
+	var cmd *exec.Cmd
+
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = exec.Command("sysctl", "-n", "machdep.cpu.brand_string")
+	case "linux":
+		cmd = exec.Command("sh", "-c", "grep -m1 'model name' /proc/cpuinfo | cut -d: -f2")
+	default:
+		cmd = exec.Command("sh", "-c", "echo 'Unknown CPU'")
+	}
+
+	output, err := cmd.Output()
 	if err != nil {
 		return "", err
 	}
 
-	if len(cpuInfo) > 0 {
-		return cpuInfo[0].ModelName, nil
-	}
-
-	return "", fmt.Errorf("No CPU information available")
+	return strings.TrimSpace(string(output)), nil
 }

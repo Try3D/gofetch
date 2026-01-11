@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"strings"
 	"unicode"
 )
 
@@ -38,10 +39,10 @@ func main() {
 		return
 	}
 
-	title := bold + blue + "gofetch" + reset
-	prompt := fmt.Sprintf("%v%v%v%v@%v%v%v%v", bold, blue, SystemInfo.CurrentUser, reset, bold, blue, SystemInfo.HostName, reset)
+	username := SystemInfo.CurrentUser
+	hostname := SystemInfo.HostName
 
-	asciiLinux := []string{
+	asciiArt := []string{
 		"    .---.    ",
 		"   /     \\   ",
 		"   \\.@-@./   ",
@@ -51,43 +52,63 @@ func main() {
 		"/`\\_`>  <_/ \\",
 		"\\__/'---'\\__/",
 	}
+	asciiWidth := 13
 
-	formattedStrings := []string{
-		fmt.Sprintf("%v%vOS:%v %v", bold, blue, reset, capitalize(SystemInfo.OS)),
-		fmt.Sprintf("%v%vDistro:%v %v %v", bold, blue, reset, capitalize(SystemInfo.Distro), SystemInfo.PlatformVersion),
-		fmt.Sprintf("%v%vCPU:%v %v", bold, blue, reset, CpuInfo),
-		fmt.Sprintf("%v%vTerminal:%v %v", bold, blue, reset, Terminal),
-		fmt.Sprintf("%v%vShell:%v %v", bold, blue, reset, Shell),
-		fmt.Sprintf("%v%vDisk (/):%v %vG / %vG (%v%%)", bold, blue, reset, DiskInfo.Used, DiskInfo.Total, DiskInfo.Percent),
-		fmt.Sprintf("%v%vBattery:%v %.f%% %v", bold, blue, reset, BatteryInfo.Charge, BatteryInfo.State),
-		fmt.Sprintf("%v%vTime to full:%v %.f h %.f min", bold, blue, reset, math.Floor(BatteryInfo.TimeToFull), 60*(BatteryInfo.TimeToFull-math.Floor(BatteryInfo.TimeToFull))),
+	infoStrings := []string{
+		fmt.Sprintf("OS: %v", capitalize(SystemInfo.OS)),
+		fmt.Sprintf("Distro: %v %v", capitalize(SystemInfo.Distro), SystemInfo.PlatformVersion),
+		fmt.Sprintf("CPU: %v", CpuInfo),
+		fmt.Sprintf("Terminal: %v", Terminal),
+		fmt.Sprintf("Shell: %v", Shell),
+		fmt.Sprintf("Disk (/): %vG / %vG (%v%%)", DiskInfo.Used, DiskInfo.Total, DiskInfo.Percent),
+		fmt.Sprintf("Battery: %.f%% %v", BatteryInfo.Charge, BatteryInfo.State),
+		fmt.Sprintf("Time to full: %.f h %.f min", math.Floor(BatteryInfo.TimeToFull), 60*(BatteryInfo.TimeToFull-math.Floor(BatteryInfo.TimeToFull))),
 	}
 
-	maxWidth := 0
-
-	for _, s := range formattedStrings {
-		if maxWidth < len(s) {
-			maxWidth = len(s)
+	// Find max width of info strings
+	maxInfoWidth := 0
+	for _, s := range infoStrings {
+		if len(s) > maxInfoWidth {
+			maxInfoWidth = len(s)
 		}
 	}
 
-	maxWidth += len(asciiLinux[0])
+	// Calculate widths
+	// Content: "│ " + ascii + " " + info + padding + " │"
+	// We need inner width (between the │ chars)
+	innerWidth := 1 + asciiWidth + 1 + maxInfoWidth + 1 // space + ascii + space + info + space
 
-	fmt.Printf("╭───%v", title)
-	printChar('─', maxWidth-len(prompt)-len(title)+27)
-	fmt.Printf("%v───╮\n", prompt)
-
-	for i, s := range formattedStrings {
-		fmt.Printf("│ ")
-		fmt.Printf("%v ", asciiLinux[i])
-		fmt.Printf("%v", s)
-		printChar(' ', maxWidth-len(s)-len(asciiLinux[0])+1)
-		fmt.Printf("│\n")
+	// Header needs: "───" + "gofetch" + "───" + user@host + "───"
+	headerInner := 3 + 7 + 3 + len(username) + 1 + len(hostname) + 3
+	if headerInner > innerWidth {
+		innerWidth = headerInner
 	}
 
-	fmt.Printf("╰")
-	printChar('─', maxWidth-12)
-	fmt.Printf("╯\n")
+	// Print top border
+	title := bold + blue + "gofetch" + reset
+	prompt := bold + blue + username + reset + "@" + bold + blue + hostname + reset
+	headerPadding := innerWidth - 3 - 7 - 3 - len(username) - 1 - len(hostname) - 3
+	fmt.Printf("╭───%s───%s%s───╮\n", title, strings.Repeat("─", headerPadding), prompt)
+
+	// Print content rows
+	for i, info := range infoStrings {
+		coloredInfo := colorizeLabel(info, bold, blue, reset)
+		padding := innerWidth - 1 - asciiWidth - 1 - len(info) - 1
+		fmt.Printf("│ %s %s%s │\n", asciiArt[i], coloredInfo, strings.Repeat(" ", padding))
+	}
+
+	// Print bottom border
+	fmt.Printf("╰%s╯\n", strings.Repeat("─", innerWidth))
+}
+
+// colorizeLabel adds color to the label part (before the colon)
+func colorizeLabel(s, bold, blue, reset string) string {
+	for i, c := range s {
+		if c == ':' {
+			return bold + blue + s[:i+1] + reset + s[i+1:]
+		}
+	}
+	return s
 }
 
 func capitalize(s string) string {
@@ -98,10 +119,4 @@ func capitalize(s string) string {
 	runes := []rune(s)
 	runes[0] = unicode.ToUpper(runes[0])
 	return string(runes)
-}
-
-func printChar(s rune, n int) {
-	for i := 0; i < n; i++ {
-		fmt.Printf("%c", s)
-	}
 }
