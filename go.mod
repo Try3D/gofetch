@@ -1,4 +1,4 @@
-module try3d/gofetch
+module github.com/try3d/gofetch
 
 go 1.21.1
 
